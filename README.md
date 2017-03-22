@@ -10,12 +10,12 @@ Function:Login and logout NJU Network access system
 作者/Author：NJU-15CS-0x42     
 鸣谢/Thanks：NJU-15CS-thyt    
        
-更多意见或建议请:
-More advice or recommendations:
-砸邮箱/E-mail:
-	triumphal.liuliu@gmail.com
-	triumphal_0x42@outlook.com
-	triumphal.liuliu@qq.com
+更多意见或建议请:     
+More advice or recommendations:     
+砸邮箱/E-mail:     
+	triumphal.liuliu@gmail.com     
+	triumphal_0x42@outlook.com     
+	triumphal.liuliu@qq.com     
      
 WeChat ID:     
 	LL19980826     
