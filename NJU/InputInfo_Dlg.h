@@ -23,4 +23,7 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnEnChangeEdit2();
+	afx_msg void On32772();
+	afx_msg void On32783();
+	afx_msg void On32784();
 };

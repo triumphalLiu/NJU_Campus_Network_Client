@@ -2,9 +2,16 @@
 #include <iostream>
 #include "NJU.h"
 #include "Wait.h"
-
+#define passwd 10
 using namespace std;
 
+char *serv1 = "13455362142011";
+char *serv2 = "14899909789418";
+char *info_file_loc = "data\\info.nju";
+char *user_file_loc = "data\\user.nju";
+char *pw_file_loc  = "data\\pw.nju";
+char *old_file_loc = "data\\old_pw.nju";
+char *change_file_loc = "data\\change.nju";
 extern char new_username[MAX_ID_LENGTH];
 extern char new_password[MAX_PASSWORD_LENGTH];
 extern status *new_status;
@@ -43,30 +50,34 @@ bool file_is_empty(char *filename)
 /*登录系统*/
 void login()
 {
-	WinExec("login_out\\login.exe", SW_HIDE);
+	WinExec("data\\login.exe", SW_HIDE);
 }
 
 /*登出系统*/
 void logout()
 {
-	WinExec("login_out\\logout.exe", SW_HIDE);
+	WinExec("data\\logout.exe", SW_HIDE);
 }
 
 /*更新用户后，修改用户名和密码*/
 void save_user()
 {
-	char *file_name1 = "username.txt";
-	char *file_name2 = "password.txt";
-	fstream file(file_name1, ios::out);
-	fstream file2(file_name2, ios::out);
+	fstream file(user_file_loc, ios::out);
+	fstream file2(pw_file_loc, ios::out);
 	fstream fp;
-	fp.open(file_name1, fstream::in | fstream::out | fstream::app);
+	fp.open(user_file_loc, fstream::in | fstream::out | fstream::app);
 	fp << new_username << "\n";
 	fp.close();
 
-	fp.open(file_name2, fstream::in | fstream::out | fstream::app);
-	fp << new_password << "\n";//修改账户名的时候要\n  只修改密码的时候不要\n
+	fp.open(pw_file_loc, fstream::in | fstream::out | fstream::app);
+	fp << new_password << "\n";
 	fp.close();
+	/*
+	for (unsigned i = 0; i < strlen(new_password); ++i)
+		fp << (char)(new_password[i] - (char)passwd);
+	fp << "\n";
+	fp.close();
+	*/
 }
 
 /*从username.txt以及password.txt读取数据到内存*/
@@ -78,30 +89,34 @@ void read_info(char *&username, char *&password)
 	free(username);
 	free(password);
 	*/
-	char *file_name1 = "username.txt";	
-	char *file_name2 = "password.txt";
 
 	ifstream fp;
-	fp.open(file_name1, ios::binary);
+	fp.open(user_file_loc, ios::binary);
 	string line;
 	getline(fp, line);
 	strcpy(username, line.c_str()); 
 	fp.close();	
 
 	ifstream fp2;
-	fp2.open(file_name2, ios::binary);
+	fp2.open(pw_file_loc, ios::binary);
 	string line2;
 	getline(fp2, line2);
 	strcpy(password, line2.c_str());
 	fp2.close();
+	/*
+	for (unsigned i = 0; i < strlen(password) - 1; ++i)
+		password[i] += (char)passwd;
+	
+	strcpy(new_password, password);
+	strcpy(new_username, username);
+	*/
 }
 
 /*读取登录后网页返回信息并写入结构体*/
-void read_status(status *&p)
+void read_status()
 {
-	char *filename = "info.txt";
 	ifstream fp;
-	fp.open(filename, ios::binary);
+	fp.open(info_file_loc, ios::binary);
 
 	string line;
 	int i = 0;
@@ -109,19 +124,25 @@ void read_status(status *&p)
 	{
 		bool finish = 0;
 		switch (i) {
-		case 0: p->successful = strcmp("successful", line.c_str()) == 0 ? 1 : 0; break;
-		case 1: p->device_amounts = atoi(line.c_str()); break;
-		case 2: p->account_balance = (float)atoi(line.c_str()) / (float)1000; break;
-		case 3: strcpy(p->username, line.c_str()); break;
-		case 4: finish = 1; break;
+		case 0: new_status->successful = atoi(line.c_str()); 	
+			if (!(new_status->successful == 1 || new_status->successful == 6))
+				return; 
+			else { 
+				break;
+			}
+		case 1: new_status->device_amounts = atoi(line.c_str()); break;
+		case 2: new_status->account_balance = (float)atoi(line.c_str()) / (float)1000; break;
+		case 3: strcpy(new_status->username, line.c_str()); break;
+		case 4: strcpy(new_status->service, line.c_str()); break;
+		case 5: finish = 1; break;
 		}
 		++i;
 		if (finish)
 			break;
 	}
 	int time = atoi(line.c_str());
-	p->hours = time / 3600;
-	p->mins = (time - p->hours * 3600) / 60;
+	new_status->hours = time / 3600;
+	new_status->mins = (time - new_status->hours * 3600) / 60;
 	//cout << p->successful << endl << p->account_balance << endl << p->device_amounts << endl << p->username << endl << p->hours << endl << p->mins << endl;
 }
 
@@ -129,4 +150,27 @@ void read_status(status *&p)
 void clean_status()
 {
 	new_status->successful = 0;
+}
+
+//判断修改密码是否成功
+int change_check()
+{
+	ifstream fp;
+	fp.open(change_file_loc, ios::binary);
+	string line;
+	getline(fp, line);
+	if (strcmp("successful", line.c_str()) == 0)
+		return 1;
+	else return 0;
+	fp.close();
+}
+
+//保存密码到某文件
+void save_password(char *&arr, char *path)
+{
+	fstream file(path, ios::out);
+	fstream fp;
+	fp.open(path, fstream::in | fstream::out | fstream::app);
+	fp << arr << "\n";
+	fp.close();
 }

@@ -12,7 +12,11 @@ extern char new_username[MAX_ID_LENGTH];
 extern char new_password[MAX_PASSWORD_LENGTH];
 extern int now_status; 
 extern status *new_status;
-
+extern char *info_file_loc;
+extern char *user_file_loc;
+extern char *pw_file_loc;
+extern char *serv1;
+extern char *serv2;
 // InputInfo_Dlg 对话框
 
 IMPLEMENT_DYNAMIC(InputInfo_Dlg, CDialogEx)
@@ -66,9 +70,11 @@ void InputInfo_Dlg::OnBnClickedOk()
 	Msgdlg->UpdateData(FALSE);
 	Msgdlg->ShowWindow(SW_SHOW);
 	Msgdlg->RedrawWindow();
-	logout();
 
 	now_status = 0;
+	char *old_username = (char *)malloc(MAX_ID_LENGTH * sizeof(char));
+	char *old_password = (char *)malloc(MAX_PASSWORD_LENGTH * sizeof(char));
+	read_info(old_username, old_password);
 	strcpy(new_username, "\0");
 	strcpy(new_password, "\0");
 	strcpy(new_username, szTemp);
@@ -76,18 +82,35 @@ void InputInfo_Dlg::OnBnClickedOk()
 	save_user();
 	login();	
 	Msgdlg->DestroyWindow();
-	
-	read_status(new_status);
-	if (new_status->successful == 0)
+	clean_status();
+	read_status();
+	if (!(new_status->successful == 1 || new_status->successful == 6))
 	{
-		CString s_fail(_T("登录失败！"));
 		now_status = 0;
-		CEdit *p_fail = (CEdit*)GetParent()->GetDlgItem(IDC_EDIT3);
-		p_fail->SetWindowText((LPCTSTR)s_fail);
+		if (new_status->successful == 3)
+		{
+			CString s_fail(_T("登录失败，用户名或密码错误！"));
+			CEdit *p_fail = (CEdit*)GetParent()->GetDlgItem(IDC_EDIT3);
+			p_fail->SetWindowText((LPCTSTR)s_fail);
+			AfxMessageBox(_T("登录失败，用户名或密码错误！"));
+		}
+		else
+		{
+			CString s_fail(_T("登录失败，未知错误，请重试！"));
+			CEdit *p_fail = (CEdit*)GetParent()->GetDlgItem(IDC_EDIT3);
+			p_fail->SetWindowText((LPCTSTR)s_fail);
+			AfxMessageBox(_T("登录失败，未知错误，请重试！"));
+		}
 		GetParent()->GetDlgItem(IDC_EDIT4)->SetWindowText(_T(""));
 		GetParent()->GetDlgItem(IDC_EDIT5)->SetWindowText(_T(""));
 		GetParent()->GetDlgItem(IDC_EDIT6)->SetWindowText(_T(""));
 		GetParent()->GetDlgItem(IDC_EDIT7)->SetWindowText(_T(""));
+		GetParent()->GetDlgItem(IDC_EDIT8)->SetWindowText(_T(""));
+		strcpy(new_username, old_username);
+		strcpy(new_password, old_password);
+		save_password(old_password, pw_file_loc);
+		save_password(old_username, user_file_loc);
+		return;
 	}
 	else
 	{
@@ -111,10 +134,27 @@ void InputInfo_Dlg::OnBnClickedOk()
 		s_time.Format(_T("%d小时%d分钟"), new_status->hours, new_status->mins);
 		CEdit *p_time = (CEdit*)GetParent()->GetDlgItem(IDC_EDIT6);
 		p_time->SetWindowText((LPCTSTR)s_time);
+		if (strcmp(serv1, new_status->service) == 0)
+		{
+			//LLMARK非学生端服务代码未获取！
+			CString s_serv;
+			s_serv.Format(_T("学生标准计时服务/1终端"), new_status->hours, new_status->mins);
+			CEdit *p_serv = (CEdit*)GetParent()->GetDlgItem(IDC_EDIT8);
+			p_serv->SetWindowText((LPCTSTR)s_serv);
+		}
+		else if(strcmp(serv2, new_status->service) == 0)
+		{
+			CString s_serv;
+			s_serv.Format(_T("学生2终端计时服务/2终端"), new_status->hours, new_status->mins);
+			CEdit *p_serv = (CEdit*)GetParent()->GetDlgItem(IDC_EDIT8);
+			p_serv->SetWindowText((LPCTSTR)s_serv);
+		}
 	}
 	CString s_butt;
 	if (now_status == 0)
+	{
 		s_butt.Format(_T("重新登录"));
+	}
 	else
 		s_butt.Format(_T("登出"));
 	CEdit *p_butt = (CEdit*)GetParent()->GetDlgItem(IDC_BUTTON3);

@@ -39,6 +39,16 @@ CNJUApp theApp;
 
 BOOL CNJUApp::InitInstance()
 {
+	/*
+	AfxEnableControlContainer();
+	VERIFY(1 == InitSkinMagicLib(AfxGetInstanceHandle(), _T("SCRIBBLE"), NULL, NULL));
+	VERIFY(1 == InitSkinMagicLib(AfxGetInstanceHandle(), NULL, NULL, NULL));
+	VERIFY(1 == SetDialogSkin(_T("Dialog"))); 
+	VERIFY(1 == LoadSkinFromResource(AfxGetInstanceHandle(), _T("IDR_SKINMAGIC"), _T("SKINMAGIC")));
+	VERIFY(1 == LoadSkinFile("skin\\corona.smf"));
+	*/
+	VERIFY(1 == InitSkinMagicLib(AfxGetInstanceHandle(), NULL, NULL, NULL));
+	VERIFY(1 == LoadSkinFile("skin\\corona.smf"));
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
 	//则需要 InitCommonControlsEx()。  否则，将无法创建窗口。
@@ -98,7 +108,7 @@ BOOL CNJUApp::InitInstance()
 #ifndef _AFXDLL
 	ControlBarCleanUp();
 #endif
-
+	VERIFY(1 == SetWindowSkin(m_pMainWnd->m_hWnd, _T("MainFrame")));
 	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
 	//  而不是启动应用程序的消息泵。
 	return FALSE;

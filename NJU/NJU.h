@@ -38,17 +38,17 @@ extern CNJUApp theApp;
 #include <cstdio>  
 #include <fstream>
 #include <string>
-
 #define MAX_FILE_PATH 100
 #define MAX_ID_LENGTH 20
 #define MAX_PASSWORD_LENGTH 20
+#define MAX_SERV_LENGTH 20
 #pragma warning (disable:4996)
 
-
 struct status {
-	bool successful;
+	int successful;
 	int device_amounts;
 	float account_balance;
+	char service[MAX_SERV_LENGTH];
 	char username[MAX_ID_LENGTH];
 	int hours;
 	int mins;
@@ -56,7 +56,9 @@ struct status {
 void read_info(char *&, char *&);
 void login();
 void logout();
-void read_status(status *&);
+void read_status();
 bool file_is_empty(char *);
 void save_user();
 void clean_status();
+int change_check();
+void save_password(char *&,char *);

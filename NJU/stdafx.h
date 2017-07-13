@@ -5,6 +5,7 @@
 
 #pragma once
 
+
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // 从 Windows 头中排除极少使用的资料
 #endif
@@ -51,4 +52,5 @@
 #endif
 #endif
 
-
+#pragma comment(lib,"SkinMagic")//调用皮肤lib
+#include "SkinMagicLib.h"//包含皮肤头文件
